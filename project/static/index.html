@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI Music Library</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1>FastAPI Music Library</h1>
+
+<!-- Form to add a new song -->
+<form id="addSongForm">
+    <label for="title">Title:</label>
+    <input type="text" id="title" required>
+    <label for="artist">Artist:</label>
+    <input type="text" id="artist" required>
+    <button type="button" onclick="addSong()">Add Song</button>
+</form>
+
+<!-- Display list of songs -->
+<div id="songList">
+    <h2>Song List</h2>
+    <ul id="songs"></ul>
+</div>
+
+<script>
+    // Function to add a new song using the API
+    async function addSong() {
+        const title = document.getElementById('title').value;
+        const artist = document.getElementById('artist').value;
+
+        try {
+            const response = await fetch('/songs/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    artist: artist,
+                }),
+            });
+
+            if (response.ok) {
+                // Refresh the song list after adding a new song
+                getSongList();
+            } else {
+                console.error('Failed to add song:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Function to get and display the list of songs from the API
+    async function getSongList() {
+        try {
+            const response = await fetch('/songs/');
+            const songs = await response.json();
+
+            const songsListElement = document.getElementById('songs');
+            songsListElement.innerHTML = ''; // Clear previous list
+
+            songs.forEach(song => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${song.title} - ${song.artist}`;
+                songsListElement.appendChild(listItem);
+            });
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Initial load of the song list when the page loads
+    document.addEventListener('DOMContentLoaded', getSongList);
+</script>
+
+</body>
+</html>
